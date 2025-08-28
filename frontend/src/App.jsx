@@ -1,7 +1,10 @@
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Landing from './pages/Landing'
-
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import Employer from './pages/Employer'
 
 function App() {
   return (
@@ -10,6 +13,10 @@ function App() {
       <div className="max-w-4xl mx-auto p-6">
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/employer" element={<Employer />} />
         </Routes>
       </div>
     </div>

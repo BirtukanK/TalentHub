@@ -6,7 +6,10 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Job, Application
 from .serializers import RegisterSerializer, JobSerializer, ApplicationSerializer
 from .permissions import IsEmployer
+from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated
 
+User = get_user_model()
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -22,6 +25,7 @@ class LoginView(TokenObtainPairView):
 
 
 class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -39,7 +43,6 @@ class JobListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
-
 
 class JobDeleteView(generics.DestroyAPIView):
     queryset = Job.objects.all()
