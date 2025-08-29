@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "core",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
@@ -132,4 +133,8 @@ REST_FRAMEWORK = {
 'DEFAULT_PERMISSION_CLASSES': (
 'rest_framework.permissions.IsAuthenticated',
 )
+}
+
+SIMPLE_JWT = {
+    "BLACKLIST_AFTER_ROTATION": True,
 }

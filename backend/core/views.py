@@ -1,23 +1,17 @@
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Job, Application
+from .models import Job, Application, User
 from .serializers import RegisterSerializer, JobSerializer, ApplicationSerializer
 from .permissions import IsEmployer
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
+from .serializers import MyTokenObtainPairSerializer
 
 User = get_user_model()
-
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token['role'] = user.role
-        token['name'] = user.name
-        return token
 
 
 class LoginView(TokenObtainPairView):
@@ -29,17 +23,27 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"detail": "Successfully logged out"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class JobListCreateView(generics.ListCreateAPIView):
-    queryset = Job.objects.select_related('created_by').all().order_by('-created_at')
+    queryset = Job.objects.all().order_by("-created_at")
     serializer_class = JobSerializer
 
-
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [permissions.IsAuthenticated(), IsEmployer()]
+        if self.request.method == "POST":
+            return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
-
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -80,3 +84,4 @@ class UserApplicationsView(generics.ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         return Application.objects.select_related('job','user').filter(user_id=user_id).order_by('-created_at')
+    

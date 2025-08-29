@@ -2,9 +2,30 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from .models import User, Job, Application
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 User = get_user_model()
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.username
+        token['role'] = user.role
+        return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add custom response fields
+        data['username'] = self.user.username
+        data['role'] = self.user.role
+
+        return data
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -30,10 +51,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source="created_by.username")
+
     class Meta:
         model = Job
-        fields = "__all__"
-        read_only_fields = ("employer",)
+        fields = ["id", "title", "description", "created_at", "created_by"]
 
 
 class ApplicationSerializer(serializers.ModelSerializer):

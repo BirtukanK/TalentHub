@@ -24,13 +24,13 @@ class User(AbstractUser):
 
 
 class Job(models.Model):
-    employer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True)
     title = models.CharField(max_length=200)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.titleq
+        return self.title
 
 
 class Application(models.Model):
