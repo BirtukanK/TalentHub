@@ -9,6 +9,7 @@ export default function Register() {
     try {
       await register(form);
       alert("Registration successful!");
+      window.location.href = "/login";
     } catch (err) {
       console.error(err.response?.data || err.message);
       alert("Error registering user");
